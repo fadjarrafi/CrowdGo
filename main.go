@@ -1,44 +1,51 @@
 package main
 
 import (
+	"golangweb/user"
 	"log"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 func main() {
-	mux := http.NewServeMux()
+	// refer https://github.com/go-sql-driver/mysql#dsn-data-source-name for details
+	// dsn := "root:@tcp(127.0.0.1:3306)/crowdgo?charset=utf8mb4&parseTime=True&loc=Local"
+	// db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
-	aboutHandler := func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Pulu pulu pulu"))
+	// if err != nil {
+	// 	log.Fatal(err.Error())
+	// }
+
+	// fmt.Println("Connection to database is good!!")
+
+	// var users []user.User
+	// db.Find(&users)
+
+	// for _, user := range users {
+	// 	fmt.Println(user.Name)
+	// 	fmt.Println(user.Email)
+	// 	fmt.Println("=============")
+	// }
+
+	router := gin.Default()
+	router.GET("/handler", handler)
+	router.Run()
+}
+
+func handler(c *gin.Context) {
+	dsn := "root:@tcp(127.0.0.1:3306)/crowdgo?charset=utf8mb4&parseTime=True&loc=Local"
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+
+	if err != nil {
+		log.Fatal(err.Error())
 	}
 
-	mux.HandleFunc("/", omah)
-	mux.HandleFunc("/ola", ola)
-	mux.HandleFunc("/wasu", wasu)
-	mux.HandleFunc("/about", aboutHandler)
+	var users []user.User
+	db.Find(&users)
 
-	log.Println("Starting web on port 8080")
+	c.JSON(http.StatusOK, users)
 
-	err := http.ListenAndServe(":8080", mux)
-	log.Fatal(err)
-}
-
-func omah(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.URL.Path)
-
-	if r.URL.Path != "/" {
-		http.NotFound(w, r)
-
-		return
-	}
-
-	w.Write([]byte("Njajal gae website golang"))
-}
-
-func ola(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Apose kokondao yarabe sorendoreri muflenso paninema panipase"))
-}
-
-func wasu(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Sue ora jamu, jamu godong kates, sue ora ketemu, ketemu pisan jaluk pites"))
 }
