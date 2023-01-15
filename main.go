@@ -1,6 +1,7 @@
 package main
 
 import (
+	"golangweb/auth"
 	"golangweb/handler"
 	"golangweb/user"
 	"log"
@@ -24,10 +25,13 @@ func main() {
 
 	userRepository := user.NewRepository(db)
 	userService := user.NewService(userRepository)
+	authService := auth.NewService()
+
+	// fmt.Println(authService.GenerateToken(1001))
 
 	userService.SaveAvatar(1, "images/1avatar.png")
 
-	userHandler := handler.NewUserHandler(userService)
+	userHandler := handler.NewUserHandler(userService, authService)
 	router := gin.Default()
 	api := router.Group("/api/v1")
 
